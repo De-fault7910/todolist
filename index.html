@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Todo List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4A6CF7;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --light-bg: #F8FAFF;
+            --card-bg: #FFFFFF;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --border: #E2E8F0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+        }
+
+        .add-btn {
+            padding: 16px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .add-btn:hover {
+            background-color: #3A5BD9;
+            transform: translateY(-2px);
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .task-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .task-card.completed {
+            opacity: 0.7;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-checkbox.checked {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+
+        .task-checkbox.checked i {
+            color: white;
+            font-size: 12px;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .task-card.completed .task-title {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .priority-tag {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .priority-high {
+            background-color: var(--danger);
+        }
+
+        .priority-medium {
+            background-color: var(--warning);
+        }
+
+        .priority-low {
+            background-color: var(--success);
+        }
+
+        .delete-btn {
+            color: var(--danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Wireframe mode */
+        .wireframe-mode {
+            --primary: #333;
+            --success: #666;
+            --danger: #333;
+            --warning: #666;
+            --light-bg: #f0f0f0;
+            --card-bg: #fff;
+            --text-dark: #333;
+            --text-light: #666;
+            --border: #ccc;
+            --shadow: none;
+        }
+
+        .wireframe-mode .task-card {
+            border: 1px solid var(--border);
+        }
+
+        .wireframe-mode .priority-tag {
+            background-color: #666;
+        }
+
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .input-section {
+                flex-direction: column;
+            }
+            
+            .filter-section {
+                flex-wrap: wrap;
+            }
+            
+            .task-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mode-toggle" id="modeToggle">Switch to Wireframe</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>My Tasks</h1>
+            <p>Stay organized and productive</p>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" class="task-input" id="taskInput" placeholder="Add a new task...">
+            <button class="add-btn" id="addTaskBtn">Add Task</button>
+        </div>
+        
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+        
+        <div class="task-list" id="taskList">
+            <!-- Tasks will be dynamically added here -->
+        </div>
+        
+        <div class="stats" id="stats">
+            <span id="totalTasks">Total: 0 tasks</span>
+            <span id="completedTasks">Completed: 0</span>
+        </div>
+    </div>
+
+    <script>
+        // Sample initial tasks
+        let tasks = [
+            { id: 1, title: "Create wireframe for Todo app", completed: true, priority: "medium" },
+            { id: 2, title: "Design high-fidelity mockup", completed: false, priority: "high" },
+            { id: 3, title: "Implement responsive layout", completed: false, priority: "high" },
+            { id: 4, title: "Add animations and interactions", completed: false, priority: "low" }
+        ];
+
+        // DOM Elements
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const modeToggle = document.getElementById('modeToggle');
+        const totalTasksSpan = document.getElementById('totalTasks');
+        const completedTasksSpan = document.getElementById('completedTasks');
+        
+        let currentFilter = 'all';
+        let isWireframeMode = false;
+
+        // Initialize the app
+        function init() {
+            renderTasks();
+            updateStats();
+            
+            // Event listeners
+            addTaskBtn.addEventListener('click', addTask);
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTask();
+            });
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderTasks();
+                });
+            });
+            
+            modeToggle.addEventListener('click', toggleMode);
+        }
+
+        // Add a new task
+        function addTask() {
+            const title = taskInput.value.trim();
+            if (title === '') return;
+            
+            const newTask = {
+                id: Date.now(),
+                title,
+                completed: false,
+                priority: 'medium'
+            };
+            
+            tasks.unshift(newTask);
+            taskInput.value = '';
+            renderTasks();
+            updateStats();
+        }
+
+        // Toggle task completion
+        function toggleTask(id) {
+            tasks = tasks.map(task => {
+                if (task.id === id) {
+                    return { ...task, completed: !task.completed };
+                }
+                return task;
+            });
+            
+            renderTasks();
+            updateStats();
+        }
+
+        // Delete a task
+        function deleteTask(id) {
+            const taskElement = document.querySelector(`[data-id="${id}"]`);
+            taskElement.style.opacity = '0';
+            taskElement.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                tasks = tasks.filter(task => task.id !== id);
+                renderTasks();
+                updateStats();
+            }, 300);
+        }
+
+        // Render tasks based on current filter
+        function renderTasks() {
+            const filteredTasks = tasks.filter(task => {
+                if (currentFilter === 'active') return !task.completed;
+                if (currentFilter === 'completed') return task.completed;
+                return true;
+            });
+            
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No ${currentFilter !== 'all' ? currentFilter : ''} tasks found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            taskList.innerHTML = filteredTasks.map(task => `
+                <div class="task-card ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})">
+                        ${task.completed ? '<i class="fas fa-check"></i>' : ''}
+                    </div>
+                    <div class="task-content">
+                        <div class="task-title">${task.title}</div>
+                    </div>
+                    <div class="priority-tag priority-${task.priority}"></div>
+                    <button class="delete-btn" onclick="deleteTask(${task.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Update task statistics
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(task => task.completed).length;
+            
+            totalTasksSpan.textContent = `Total: ${total} ${total === 1 ? 'task' : 'tasks'}`;
+            completedTasksSpan.textContent = `Completed: ${completed}`;
+        }
+
+        // Toggle between wireframe and high-fidelity mode
+        function toggleMode() {
+            isWireframeMode = !isWireframeMode;
+            document.body.classList.toggle('wireframe-mode', isWireframeMode);
+            modeToggle.textContent = isWireframeMode ? 'Switch to High-Fidelity' : 'Switch to Wireframe';
+        }
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
